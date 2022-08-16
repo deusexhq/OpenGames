@@ -1,7 +1,7 @@
 # OpenCTF - Capture the Flag mutator
 
 ## Install
-Drop the files (OpenCTF.u, OpenGames.ini) in your servers /System folder.
+Drop the files (OpenCTF.u, OpenGames.int) in your servers /System folder.
 
 Open your server config file (Usually DeusEx.ini), and find the DeusEx.DeusExGameEngine block.
 At the bottom, add the following;
