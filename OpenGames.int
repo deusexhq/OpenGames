@@ -1,0 +1,9 @@
+[Public]
+Object=(Name=OpenCTF.ctf,Class=Class,MetaClass=Engine.Mutator,Description="Capture the Flag")
+Object=(Name=KillConfirmed.killconfirmed,Class=Class,MetaClass=Engine.Mutator,Description="KillConfirmed")
+Preferences=(Caption="OpenGames",Parent="Advanced Options")
+Preferences=(Caption="CTF",Parent="OpenGames",Class=OpenCTF.ctf,Immediate=True)
+Preferences=(Caption="CTFTeamManager",Parent="OpenGames",Class=OpenCTF.ctfTeamManager,Immediate=True)
+Preferences=(Caption="CTFFlag",Parent="OpenGames",Class=OpenCTF.ctfFlag,Immediate=True)
+Preferences=(Caption="Kill Confirmed",Parent="OpenGames",Class=KillConfirmed.killconfirmed,Immediate=True)
+Preferences=(Caption="Kill Confirmed Capture",Parent="OpenGames",Class=KillConfirmed.CapturePoint,Immediate=True)
