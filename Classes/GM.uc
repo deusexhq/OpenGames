@@ -61,15 +61,35 @@ function PostBeginPlay(){
     
 }
 
+function GetName(){
+        switch(GMMode){
+            case GM_CTF:
+                return "CTF"
+
+            case GM_KillConfirmed:
+                return "KillConfirmed"
+
+            case GM_Omni:
+                return "Omni"
+
+            case GM_Random:
+                return "Random"
+
+            case GM_Off:
+                return "OFF"
+        }
+}
+
 function Mutate(string MutateString, PlayerPawn Sender){
     local string new_gm;
 
     if(MutateString ~= "gm"){
-        Sender.ClientMessage("GM is currently"@GMMode);
+        Sender.ClientMessage("GM is currently"@GetName());
     }
     if(left(MutateString,3) ~= "gm " && DeusExPlayer(Sender).bAdmin) {
         new_gm = Left(Right(MutateString, Len(MutateString) - 3),InStr(MutateString," "));
         if(new_gm != ""){
+            Sender.ClientMessage("Setting "$new_gm);
             switch(new_gm){
                 case "ctf":
                     GMMode = GM_CTF;
@@ -89,7 +109,7 @@ function Mutate(string MutateString, PlayerPawn Sender){
                     break;
             }
             SaveConfig();
-            Sender.ClientMessage("GM set to"@GMMode);
+            Sender.ClientMessage("GM set to"@GetName());
 
         }
     }
