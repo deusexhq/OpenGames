@@ -10,7 +10,7 @@ ServerPackages=OpenGames
 ServerActors=OpenGames.GM
 ```
 
-Once the server is running, you can change the current mode either in Advanced Options (Options > Open Games > GM) or as in-game commands (Mutate gm ctf/kc/omno/random/off)
+Once the server is running, you can change the current mode either in Advanced Options (Options > Open Games > GM) or as in-game commands (Mutate gm ctf/kc/omni/random/off)
 
 ## Kill Confirmed
 ### Gameplay
