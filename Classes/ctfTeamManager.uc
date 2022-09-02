@@ -100,16 +100,20 @@ function Destroyed(){
 
 defaultproperties
 {
+    bStatic=False
     FlagCaptureScore=5
     CaptureDistance=150.0
     LightType=LT_Steady
     LightEffect=LE_Disco
     LightBrightness=255
     LightSaturation=50
-    LightRadius=20
+    LightRadius=40
     DrawType=DT_Mesh
+    Texture=Texture'DeusExDeco.Skins.DXLogoTex1'
 	Mesh=Mesh'DXLogo'
-    Drawscale=0.5
+    Drawscale=0.7
     bHidden=False
     Physics=PHYS_Rotating
+    bFixedRotationDir=True
+    RotationRate=(Yaw=8192)
 }
