@@ -61,23 +61,44 @@ function PostBeginPlay(){
     
 }
 
-function GetName(){
-        switch(GMMode){
-            case GM_CTF:
-                return "CTF"
+function string GetName(){
+    switch(GMMode){
+        case GM_CTF:
+            return "CTF";
 
-            case GM_KillConfirmed:
-                return "KillConfirmed"
+        case GM_KillConfirmed:
+            return "KillConfirmed";
 
-            case GM_Omni:
-                return "Omni"
+        case GM_Omni:
+            return "Omni";
 
-            case GM_Random:
-                return "Random"
+        case GM_Random:
+            return "Random";
 
-            case GM_Off:
-                return "OFF"
-        }
+        case GM_Off:
+            return "OFF";
+    }
+}
+
+function ChangeMode(string new_gm){
+    switch(new_gm){
+        case "ctf":
+            GMMode = GM_CTF;
+            break;
+        case "kc":
+        case "killconfirmed":
+            GMMode = GM_KillConfirmed;
+            break;
+        case "omni":
+            GMMode = GM_Omni;
+            break;
+        case "random":
+            GMMode = GM_Random;
+            break;
+        case "off":
+            GMMode = GM_Off;
+            break;
+    }
 }
 
 function Mutate(string MutateString, PlayerPawn Sender){
@@ -86,31 +107,24 @@ function Mutate(string MutateString, PlayerPawn Sender){
     if(MutateString ~= "gm"){
         Sender.ClientMessage("GM is currently"@GetName());
     }
-    if(left(MutateString,3) ~= "gm " && DeusExPlayer(Sender).bAdmin) {
-        new_gm = Left(Right(MutateString, Len(MutateString) - 3),InStr(MutateString," "));
+
+    if(left(MutateString,4) ~= "gmr " && DeusExPlayer(Sender).bAdmin) {
+        new_gm = Right(MutateString, Len(MutateString) - 4);
         if(new_gm != ""){
             Sender.ClientMessage("Setting "$new_gm);
-            switch(new_gm){
-                case "ctf":
-                    GMMode = GM_CTF;
-                    break;
-                case "kc":
-                case "killconfirmed":
-                    GMMode = GM_KillConfirmed;
-                    break;
-                case "omni":
-                    GMMode = GM_Omni;
-                    break;
-                case "random":
-                    GMMode = GM_Random;
-                    break;
-                case "off":
-                    GMMode = GM_Off;
-                    break;
-            }
+            ChangeMode(new_gm);
+            SaveConfig();
+            ConsoleCommand("servertravel restart");
+        }
+    }
+
+    if(left(MutateString,3) ~= "gm " && DeusExPlayer(Sender).bAdmin) {
+        new_gm = Right(MutateString, Len(MutateString) - 3);
+        if(new_gm != ""){
+            Sender.ClientMessage("Setting "$new_gm);
+            ChangeMode(new_gm);
             SaveConfig();
             Sender.ClientMessage("GM set to"@GetName());
-
         }
     }
 
