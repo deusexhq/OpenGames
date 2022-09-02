@@ -12,10 +12,10 @@ function Timer(){
 	local float lowestDist;
 	lowestDist = CaptureDistance;
 
-    foreach VisibleActors(class'DeusExPlayer', dxp, 50){
+    /*foreach VisibleActors(class'DeusExPlayer', dxp, 50){
         if(dxp.PlayerReplicationInfo.Team == TeamID) dxp.ClientMessage("This is your base.");
         if(dxp.PlayerReplicationInfo.Team != TeamID) dxp.ClientMessage("This is the enemy base.");
-    }
+    }*/
 
 	foreach VisibleActors(class'ctfFlag', P, CaptureDistance){
 		if(P != None && P.TeamID != TeamID){
@@ -89,10 +89,20 @@ function SayToEnemyTeam(int TeamNum, string Msg){
 }
 function string GetName(DeusExPlayer p){return p.PlayerReplicationInfo.PlayerName;}
 
+function Destroyed(){
+	if ( myFlag != None ){
+		myFlag.ctfManager = None;
+        myFlag.Destroy();
+    }
+
+	Super.Destroyed();
+}
+
 defaultproperties
 {
     FlagCaptureScore=5
     CaptureDistance=150.0
+    LightType=LT_Steady
     LightEffect=LE_Disco
     LightBrightness=255
     LightSaturation=50

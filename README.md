@@ -1,4 +1,4 @@
-# OpenCTF - Capture the Flag mutator
+# OpenGames
 
 ## Install
 Drop the files (OpenCTF.u, OpenGames.int) in your servers /System folder.

@@ -1,4 +1,4 @@
-class ctf extends Mutator config(OpenGames);
+class GMCTF extends Mutator config(OpenGames);
 
 var() config bool bEnabled;
 
@@ -10,21 +10,24 @@ struct CtfMaps
 };
 
 var() config CtfMaps Maps[64];
+var ctfTeamManager f1, f0;
+
+function PreBeginPlay(){
+  Super.PreBeginPlay();
+  Level.Game.BaseMutator.AddMutator(self);
+}
 
 function PostBeginPlay(){
-  local Vector t0, t1;
-  local ctfTeamManager f1, f0;
+  super.PostBeginPlay();
+}
 
-	Super.PostBeginPlay();
-  Level.Game.BaseMutator.AddMutator (Self);
+function InitializeCTF(){
+    local Vector t0, t1;
+    Log("Initializing "$self$"...", 'CTF');
 
-  if(!Level.Game.bTeamGame) bEnabled = False;
-  if(!bValidMap()) bEnabled = False;
-
-  Log("State: "$bEnabled, 'CTF');
-  if(bEnabled){
+    bEnabled = True;
     DeusExMPGame(Level.Game).bFreezeScores = True;
-    Log("Enabled, spawning...", 'CTF');
+
     t0 = GetTeam0Loc();
     t1 = GetTeam1Loc();
 
@@ -33,12 +36,20 @@ function PostBeginPlay(){
 
     f0 = Spawn(class'ctfTeamManager',,,t0);
     f0.TeamID = 0;
+    f0.LightHue = 150;
     f0.SetTimer(1, True);
 
     f1 = Spawn(class'ctfTeamManager',,,t1);
     f1.TeamID = 1;
+    f1.LightHue = 0;
     f1.SetTimer(1, True);
-  }
+}
+
+function ShutdownCTF(){
+  f0.Destroy();
+  f1.Destroy();
+  bEnabled = False;
+  DeusExMPGame(Level.Game).bFreezeScores = False;
 }
 
 function Install(){
@@ -142,6 +153,7 @@ function Mutate(string MutateString, PlayerPawn Sender){
     if(MutateString ~= "ctf.enable" && DeusExPlayer(Sender).bAdmin){
       if(bEnabled) return;
       bEnabled = True;
+      InitializeCTF();
       SaveConfig();
       BroadcastMessage("CTF enabled.");
     }
@@ -149,6 +161,7 @@ function Mutate(string MutateString, PlayerPawn Sender){
     if(MutateString ~= "ctf.disable" && DeusExPlayer(Sender).bAdmin){
       if(!bEnabled) return;
       bEnabled = false;
+      ShutdownCTF();
       SaveConfig();
       BroadcastMessage("CTF disabled.");
     }
