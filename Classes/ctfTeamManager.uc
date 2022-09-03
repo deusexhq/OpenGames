@@ -42,7 +42,7 @@ function Timer(){
 }
 
 function CheckWin(DeusExPlayer winner){
-    if(DeusExMPGame(Level.Game).VictoryCondition ~= "frags" && winner.PlayerReplicationInfo.score > DeusExMPGame(Level.Game).ScoreToWin){
+    if(DeusExMPGame(Level.Game).VictoryCondition ~= "frags" && winner.PlayerReplicationInfo.score >= DeusExMPGame(Level.Game).ScoreToWin){
         DeusExMPGame(Level.Game).PreGameOver();
         if(DeathMatchGame(Level.Game)!=None) DeathMatchGame(Level.Game).PlayerHasWon( Winner, Winner, None, " [Capture the Flag]" );
         if(TeamDMGame(Level.Game)!=None) TeamDMGame(Level.Game).TeamHasWon( Winner.PlayerReplicationInfo.Team, Winner, None, " [Capture the Flag]" );

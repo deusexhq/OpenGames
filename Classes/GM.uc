@@ -33,7 +33,12 @@ function PostBeginPlay(){
                 ctf = Spawn(class'GMCTF');
                 
                 if(!ctf.bValidMap()) {
-                    Log("CTF is not set up for this map.", 'GM');    
+                    if(ctf.bFullAuto){
+                        ctf.GenerateBases();
+                    } else {
+                        Log("CTF is not set up for this map.", 'GM');  
+                    }
+                      
                     return;
                 }
                 ctf.InitializeCTF();

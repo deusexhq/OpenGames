@@ -16,7 +16,7 @@ function PostBeginPlay(){
 }
 
 function CheckWin(DeusExPlayer winner){
-    if(winner.PlayerReplicationInfo.score > DeusExMPGame(Level.Game).ScoreToWin){
+    if(winner.PlayerReplicationInfo.score >= DeusExMPGame(Level.Game).ScoreToWin){
         DeusExMPGame(Level.Game).PreGameOver();
         if(DeathMatchGame(Level.Game)!=None) DeathMatchGame(Level.Game).PlayerHasWon( Winner, Winner, None, " [Won by score limit]" );
         if(TeamDMGame(Level.Game)!=None) TeamDMGame(Level.Game).TeamHasWon( Winner.PlayerReplicationInfo.Team, Winner, None, " [Won by score limit]" );

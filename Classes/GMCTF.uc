@@ -10,7 +10,12 @@ struct CtfMaps
 };
 
 var() config CtfMaps Maps[64];
+var() config bool bFullAuto;
+var() config float RequiredDistance;
+
 var ctfTeamManager f1, f0;
+
+//@todo test automatic generation
 
 function PreBeginPlay(){
   Super.PreBeginPlay();
@@ -47,6 +52,45 @@ function InitializeCTF(){
     f1.SetTimer(1, True);
 }
 
+function GenerateBases(){
+  local PlayerStart s0, s1, fs0, fs1;
+  local float dist, longest;
+  local int count;
+  
+  if(bEnabled) ShutdownCTF();
+  log("Starting auto-generation...", 'CTF');
+
+  foreach AllActors(class'PlayerStart', s0){
+    count++;
+    foreach AllActors(class'PlayerStart', s1){
+      dist = VSize(s1.Location - s0.Location);
+      log("Distance is "$dist, 'CTF');
+      if(dist > longest){
+        log("New furthest distance recorded.", 'CTF');
+        fs0 = s0;
+        fs1 = s1;
+        longest = dist;
+      }
+    }
+  }
+  
+  if(count < 2){
+    Log("Not enough playerstart objects to generate bases.", 'CTF');
+    return;
+  }
+  
+  if(longest < RequiredDistance){
+    Log("Bases must be at least"@RequiredDistance@"apart. (Currently"@longest$")");
+    return;
+  }
+  
+  Install();
+  SetTeam0Loc(fs0.Location);
+  SetTeam1Loc(fs1.Location);
+  SaveConfig();
+  InitializeCTF();
+}
+
 function ModifyPlayer(Pawn P) {  
     local Vector Loc;
     Log("Moving player "$p, 'CTF');
@@ -80,7 +124,9 @@ function ShutdownCTF(){
 
 function Install(){
   local int i;
+
   if(bValidMap()) return;
+
   for(i=0;i<32;i++){
     if(Maps[i].MapName == ""){
       Maps[i].MapName = Left(string(Level), InStr(string(Level), "."));
@@ -132,7 +178,7 @@ function bool bValidMap(){
       return True;
     }
   }
-  Log("Called in invalid map.", 'CTF');
+  //Log("Called in invalid map.", 'CTF');
   return False;
 }
 
@@ -153,7 +199,8 @@ function Mutate(string MutateString, PlayerPawn Sender){
     }
 
     if(MutateString ~= "ctf.help"){
-      Sender.ClientMessage("ctf, ctf.help, *ctf.resetscores, *ctf.setteam0, *ctf.setteam1, *ctf.stuck, *ctf.enable, *ctf.disable");
+      Sender.ClientMessage("Mutate commands: ctf, ctf.help, *ctf.resetscores, *ctf.setteam0, *ctf.setteam1, *ctf.stuck, *ctf.enable, *ctf.disable, *ctf.auto");
+      Sender.ClientMessage("Commands marked with * require admin.");
     }
 
     if(MutateString ~= "ctf.resetscores" && DeusExPlayer(Sender).bAdmin){
@@ -161,7 +208,9 @@ function Mutate(string MutateString, PlayerPawn Sender){
       BroadcastMessage("Scoreboard reset.");
     }
 
-
+    if(MutateString ~= "ctf.auto" && DeusExPlayer(Sender).bAdmin){
+      GenerateBases();
+    }
     if(MutateString ~= "ctf.setteam0" && DeusExPlayer(Sender).bAdmin){
       Install();
       SetTeam0Loc(Sender.Location);
@@ -203,4 +252,6 @@ function Mutate(string MutateString, PlayerPawn Sender){
 
 defaultproperties
 {
+  RequiredDistance=500
+  bFullAuto=True
 }
