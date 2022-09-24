@@ -42,13 +42,19 @@ function InitializeCTF(){
     f0 = Spawn(class'ctfTeamManager',,,t0);
     f0.TeamID = 0;
     f0.LightHue = 150;
-    f0.Texture = Texture'AlarmLightTex7';
+    f0.Texture = Texture'AlarmLightTex6';
+    f0.Skin = Texture'AlarmLightTex6';
+    f0.Style = STY_Translucent;
+    f0.Drawscale=2;
     f0.SetTimer(1, True);
 
     f1 = Spawn(class'ctfTeamManager',,,t1);
     f1.TeamID = 1;
     f1.LightHue = 0;
-    f1.Texture = Texture'AlarmLightTex3';
+    f1.Texture = Texture'AlarmLightTex2';
+    f1.Skin = Texture'AlarmLightTex2';
+    f1.Style = STY_Translucent;
+    f1.Drawscale=2;
     f1.SetTimer(1, True);
 }
 
@@ -101,18 +107,12 @@ function ModifyPlayer(Pawn P) {
       loc = f1.location + (p.CollisionRadius+Default.CollisionRadius+30) * Vector(f1.Rotation) + vect(0,0,1) * 15;
 
     DeusExPlayer(P).SetCollision(false, false, false);
-    DeusExPlayer(P).bCollideWorld = true;
-    DeusExPlayer(P).GotoState('PlayerWalking');
-    DeusExPlayer(P).SetLocation(loc);
-
-    
+    DeusExPlayer(P).SetPhysics(PHYS_None);
+    DeusExPlayer(P).SetLocation(loc);    
     DeusExPlayer(P).SetCollision(true, true , true);
     DeusExPlayer(P).SetPhysics(PHYS_Walking);
-    DeusExPlayer(P).bCollideWorld = true;
-    DeusExPlayer(P).GotoState('PlayerWalking');
-    DeusExPlayer(P).ClientReStart();
   
-   Super.ModifyPlayer(P);
+   	Super.ModifyPlayer(P);
 }
 
 function ShutdownCTF(){

@@ -2,6 +2,7 @@ class GM extends Mutator config(OpenGames);
 
 enum ELoad
 {
+    GM_Agents,
 	GM_CTF,
 	GM_KillConfirmed,
 	GM_Omni,
@@ -23,6 +24,9 @@ function PostBeginPlay(){
     if (Level.NetMode != NM_Standalone && Role == ROLE_Authority){
 
         switch(GMMode){
+            case GM_Agents:
+                Spawn(class'GMAgents');
+                break;
             case GM_CTF:
                 if(!Level.Game.bTeamGame) {
                     Log("CTF must be started in Team DM.", 'GM');
@@ -68,6 +72,9 @@ function PostBeginPlay(){
 
 function string GetName(){
     switch(GMMode){
+        case GM_Agents:
+            return "Agents";
+            
         case GM_CTF:
             return "CTF";
 
@@ -85,8 +92,11 @@ function string GetName(){
     }
 }
 
-function ChangeMode(string new_gm){
+function ChangeMode(string new_gm, bool bRestart){
     switch(new_gm){
+        case "agents":
+            GMMode = GM_Agents;
+            break;
         case "ctf":
             GMMode = GM_CTF;
             break;
@@ -104,32 +114,77 @@ function ChangeMode(string new_gm){
             GMMode = GM_Off;
             break;
     }
+    SaveConfig();
+    if(bRestart) ConsoleCommand("servertravel restart");
+}
+
+function DeusExPlayer GetPlayer(int id){
+    local DeusExPlayer P;
+    
+    foreach AllActors(class'DeusExPlayer', P){
+        if(P.PlayerReplicationInfo.PlayerID == id) return P;
+    }
 }
 
 function Mutate(string MutateString, PlayerPawn Sender){
-    local string new_gm;
-
+    local string mstr;
+    local DeusExPlayer Target;
+    
     if(MutateString ~= "gm"){
         Sender.ClientMessage("GM is currently"@GetName());
+        Sender.ClientMessage("Options: agents, ctf, kc, omni, random, off")
     }
-
+    
+    if(MutateString ~= "gm.help"){
+        Sender.ClientMessage("gm, gm.help, gm.switch <id>, gm.spectate <id>, gmr <mode>, gm <mode>")
+    }
+    
+    if(left(MutateString,10) ~= "gm.switch " && DeusExPlayer(Sender).bAdmin) {
+        mstr = Right(MutateString, Len(MutateString) - 10);
+        if(mstr != ""){
+            Target = GetPlayer(int(mstr));
+            if(Target != None){
+                if(Target.PlayerReplicationInfo.Team == 0){
+                    Target.ChangeTeam(1);
+                    BroadcastMessage("|P7Game Manager|P1: "$Target.PlayerReplicationInfo.PlayerName$" was switched to NSF by "$Sender.PlayerReplicationInfo.PlayerName$".");
+                } else {
+                    Target.ChangeTeam(0);
+                    BroadcastMessage("|P7Game Manager|P1: "$Target.PlayerReplicationInfo.PlayerName$" was switched to UNATCO by "$Sender.PlayerReplicationInfo.PlayerName$".");
+                }
+            } else {
+                Sender.ClientMessage("No player found with ID "$mstr);
+            }
+        } else Sender.ClientMessage("Needs a players ID.");
+    }
+    
+    if(left(MutateString,12) ~= "gm.spectate " && DeusExPlayer(Sender).bAdmin) {
+        mstr = Right(MutateString, Len(MutateString) - 12);
+        if(mstr != ""){
+            Target = GetPlayer(int(mstr));
+            if(Target != None){
+                Target.GotoState('PlayerSpectating');
+                BroadcastMessage("|P7Game Manager|P1: "$Target.PlayerReplicationInfo.PlayerName$" was set to spectate by "$Sender.PlayerReplicationInfo.PlayerName$".");
+            } else {
+                Sender.ClientMessage("No player found with ID "$mstr);
+            }
+        } else Sender.ClientMessage("Needs a players ID.");
+    }
+    
     if(left(MutateString,4) ~= "gmr " && DeusExPlayer(Sender).bAdmin) {
-        new_gm = Right(MutateString, Len(MutateString) - 4);
-        if(new_gm != ""){
-            Sender.ClientMessage("Setting "$new_gm);
-            ChangeMode(new_gm);
-            SaveConfig();
-            ConsoleCommand("servertravel restart");
+        mstr = Right(MutateString, Len(MutateString) - 4);
+        if(mstr != ""){
+            Sender.ClientMessage("Setting "mstr);
+            ChangeMode(new_gm, True);
+            BroadcastMessage("|P7Game Manager|P1: Mode is set to"@GetName()$". Restarting...");
         }
     }
 
     if(left(MutateString,3) ~= "gm " && DeusExPlayer(Sender).bAdmin) {
-        new_gm = Right(MutateString, Len(MutateString) - 3);
-        if(new_gm != ""){
-            Sender.ClientMessage("Setting "$new_gm);
-            ChangeMode(new_gm);
-            SaveConfig();
-            Sender.ClientMessage("GM set to"@GetName());
+        mstr = Right(MutateString, Len(MutateString) - 3);
+        if(mstr != ""){
+            Sender.ClientMessage("Setting "mstr);
+            ChangeMode(mstr), False;
+            BroadcastMessage("|P7Game Manager|P1: Mode is set to"@GetName());
         }
     }
 

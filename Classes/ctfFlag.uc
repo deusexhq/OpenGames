@@ -5,7 +5,8 @@ class ctfFlag extends DeusExDecoration config (OpenGames);
 
 var int Ctr;
 var int TeamID;
-var() config int RespawnSeconds;
+var() config int RespawnSeconds, MaxTimeAway;
+var int TimeAway;
 var Vector lastLocation;
 var DeusExPlayer lastFrobber;
 var DeusExPlayer CarriedBy;
@@ -35,6 +36,7 @@ function GiveToPlayer(DeusExPlayer P){
     if(P.PlayerReplicationInfo.Team != TeamID) p.ClientMessage("Take the flag to your base!");
     if(P.PlayerReplicationInfo.Team == TeamID) p.ClientMessage("Protect the flag!");
     bPushable=True;
+    P.PutInHand(None);
     CarriedBy = p;
     P.GrabDecoration();
 }
@@ -69,7 +71,18 @@ function bool NearHome(){
 
 function Timer(){
     local DeusExPlayer nearby;
-
+    
+    if(NearHome() && TimeAway > 0) TimeAway = 0;
+    
+    if(!NearHome()){
+        TimeAway++;
+        if(TimeAway >= MaxTimeAway){
+            Log("Flag "$TeamID$" moved back home.", 'CTF');
+            BroadcastMessage("|Cdaa520Flag "$TeamID$" has respawned.");
+            Destroy();
+        }
+    }
+    
     if(Location == lastLocation && !NearHome()){
         Ctr += 1;
         Log("Flag "$TeamID$": "$Ctr, 'CTF');
@@ -134,4 +147,5 @@ defaultproperties
      Mass=40.000000
      Buoyancy=30.000000
      bPushable=False
+     MaxTimeAway=120
 }
