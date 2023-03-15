@@ -18,8 +18,8 @@ var ctfTeamManager f1, f0;
 //@todo test automatic generation
 
 function PreBeginPlay(){
-  Super.PreBeginPlay();
-  Level.Game.BaseMutator.AddMutator(self);
+  	Level.Game.BaseMutator.AddMutator(self);
+	Super.PreBeginPlay();
 }
 
 function PostBeginPlay(){

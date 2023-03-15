@@ -2,6 +2,8 @@
 // Contains the info of each class, and the logic for creating custom classes
 class agentsClass extends Actor;
 
+var() string DisplayName;
+
 //Enumeration of the class choices, if any but C_Custom are chosen, the teleporter sets that class, if C_Custom IS chosen, ignores those and uses the cInv, cAugs and cSkinClassName variables for the class instead. 
 enum cClass
 {
@@ -45,6 +47,11 @@ function GiveItem(class<Inventory> GiveClass, DeusExPlayer Sender)
 	}
 }
 
+function string GetDisplayName(){
+	if(DisplayName != "") return DisplayName;
+	return string(self);
+}
+
 //Gives the augmentation. Giving it twice, because the first adds it at level 1, the second add raises its level. 
 function GiveAug(class<Augmentation> GiveAugClass, DeusExPlayer Sender)
 {
@@ -85,15 +92,10 @@ function SetSkin(string str, DeusExPlayer P)
 
 //Where the magic happens
 //All skin choices are placeholders
-function ActivateAgent(Actor instigator)
-{
-	local DeusExPlayer P;
-	local Actor Target;
+function ActivateAgent(DeusExPlayer P){
 	local int i;
-	P = DeusExPlayer(Instigator);
-	
-	if(P != None)
-	{
+
+	if(P != None){
 		if(ClassChoice == C_Soldier){
 			GiveItem(class'WeaponAssaultGun', P);
 			GiveItem(class'WeaponCombatKnife', P);
@@ -205,7 +207,7 @@ function ActivateAgent(Actor instigator)
 		}
 		
 		
-		if(ClassChoice == C_Custom)	{
+		if(ClassChoice == C_Custom){
 			for(i=0;i<16;i++)
 				if(cInv[i] != None)
 					GiveItem(cInv[i], P);

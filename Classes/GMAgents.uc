@@ -13,6 +13,9 @@ class GMAgents extends Mutator config(OpenGames);
 var() config bool bModSpydrone, bKillCarcasses;
 var() config int BioRegenLimit;
 var() config bool bLoadDefaultClasses;
+var agentsMenu acm;
+var agentsClass agentsList[32];
+var int agentsCount;
 
 function PreBeginPlay(){
     local agentsClass soldier, medic, stealth, sniper, engineer;
@@ -23,20 +26,64 @@ function PreBeginPlay(){
     if(bLoadDefaultClasses){
         soldier = Spawn(class'agentsClass');
         soldier.classChoice = C_Soldier;
+        soldier.Displayname = "Soldier";
         
         medic = Spawn(class'agentsClass');
         medic.classChoice = C_Medic;
+        medic.Displayname = "Medic";
         
         stealth = Spawn(class'agentsClass');
         stealth.classChoice = C_Stealth;
+        stealth.Displayname = "Stealth";
         
         sniper = Spawn(class'agentsClass');
         sniper.classChoice = C_Sniper;
+        sniper.Displayname = "Sniper";
         
         engineer = Spawn(class'agentsClass');
         engineer.classChoice = C_Engineer;
-        
+        engineer.Displayname = "Engineer";
     }
+}
+
+function ApplyClass(DeusExPlayer P, int index){
+	local agentsClass a;
+	
+	
+	a = agentsList[index];
+	P.ClientMessage("Activating Agent "$a.GetDisplayName());
+	a.ActivateAgent(P);
+}
+
+function refreshClassList(){
+	local agentsClass c;
+	local int i;
+	
+	Log("Updating class list...", 'Agents');
+	for(i=0;i<=32;i++) agentsList[i] = None;
+	i = 0;
+	foreach AllActors(class'agentsClass', c){
+		agentsList[i] = c;
+		i++;
+	}
+	
+	agentsCount = i;
+	Log(i$" classes added.", 'Agents');
+}
+
+final function agentsMenuProxy GetProxy(Actor A){
+	local agentsMenuProxy D;
+	local int i;
+	
+	if ((A != None))
+		foreach AllActors(class'agentsMenuProxy', D)
+			if (D.Owner == A)
+				return D;
+
+	D = Spawn(class'agentsMenuProxy', A);
+	D.Host = self;
+	for(i = 0;i<=32;i++) D.agentsList[i] = agentsList[i];
+	return D;
 }
 
 
@@ -100,6 +147,13 @@ function ModifyPlayer(Pawn Other){
 		P.Multiskins[i] = P.default.Multiskins[i];
 	
 	
+   P.ClientMessage("Welcome, Agent.");
+   // Making sure our list is up to date
+   refreshClassList();
+   
+   // Open class menu through the proxy actor, replication hack
+   GetProxy(P).OpenClassMenu();
+   
    Super.ModifyPlayer(Other);
 }
 
@@ -128,15 +182,39 @@ function Tick(float deltatime){
 
 function Mutate (String S, PlayerPawn PP)
 {	
+	local int i;
+	
 	Super.Mutate (S, PP);
 	
-	if(S ~= "cdx.carcass"){
+	if(S ~= "agents.list"){
+		refreshClassList();
+		
+		for(i=0;i<=32;i++) {
+			if(agentsList[i] != None) PP.ClientMessage(agentsList[i].GetDisplayName());
+		}
+	}
+	
+    if(left(S,14) ~= "agents.select ") {
+        i = int(Right(S, Len(S) - 14));
+
+		ApplyClass(DeusExPlayer(PP), i);
+
+    }
+    
+	if(S ~= "agents.menu"){
+		// Making sure our list is up to date
+		refreshClassList();
+		
+		// Open class menu through the proxy actor, replication hack
+		GetProxy(PP).OpenClassMenu();
+	}
+	if(S ~= "agents.carcass" && DeusExPlayer(PP).bAdmin){
 		bKillCarcasses = !bKillCarcasses;
 		BroadcastMessage("Carcass disposal: " $ bKillCarcasses);
 		SaveConfig();
 	}
 	
-	if(S ~= "cdx.drones"){
+	if(S ~= "agents.drones" && DeusExPlayer(PP).bAdmin){
 		bModSpydrone = !bModSpydrone;
 		BroadcastMessage("Drone Modding: " $ bModSpydrone);
 		SaveConfig();

@@ -1,3 +1,6 @@
+/*
+Manager for OpenGames.
+*/
 class GM extends Mutator config(OpenGames);
 
 enum ELoad
@@ -13,8 +16,8 @@ enum ELoad
 var() config ELoad	GMMode;	
 
 function PreBeginPlay(){
-  Super.PreBeginPlay();
-  Level.Game.BaseMutator.AddMutator(self);
+	Level.Game.BaseMutator.AddMutator(self);
+	Super.PreBeginPlay();
 }
 
 function PostBeginPlay(){
@@ -132,11 +135,11 @@ function Mutate(string MutateString, PlayerPawn Sender){
     
     if(MutateString ~= "gm"){
         Sender.ClientMessage("GM is currently"@GetName());
-        Sender.ClientMessage("Options: agents, ctf, kc, omni, random, off")
+        Sender.ClientMessage("Options: agents, ctf, kc, omni, random, off");
     }
     
     if(MutateString ~= "gm.help"){
-        Sender.ClientMessage("gm, gm.help, gm.switch <id>, gm.spectate <id>, gmr <mode>, gm <mode>")
+        Sender.ClientMessage("gm, gm.help, gm.switch <id>, gm.spectate <id>, gmr <mode>, gm <mode>");
     }
     
     if(left(MutateString,10) ~= "gm.switch " && DeusExPlayer(Sender).bAdmin) {
@@ -173,8 +176,8 @@ function Mutate(string MutateString, PlayerPawn Sender){
     if(left(MutateString,4) ~= "gmr " && DeusExPlayer(Sender).bAdmin) {
         mstr = Right(MutateString, Len(MutateString) - 4);
         if(mstr != ""){
-            Sender.ClientMessage("Setting "mstr);
-            ChangeMode(new_gm, True);
+            Sender.ClientMessage("Setting "$mstr);
+            ChangeMode(mstr, True);
             BroadcastMessage("|P7Game Manager|P1: Mode is set to"@GetName()$". Restarting...");
         }
     }
@@ -182,8 +185,8 @@ function Mutate(string MutateString, PlayerPawn Sender){
     if(left(MutateString,3) ~= "gm " && DeusExPlayer(Sender).bAdmin) {
         mstr = Right(MutateString, Len(MutateString) - 3);
         if(mstr != ""){
-            Sender.ClientMessage("Setting "mstr);
-            ChangeMode(mstr), False;
+            Sender.ClientMessage("Setting "$mstr);
+            ChangeMode(mstr, False);
             BroadcastMessage("|P7Game Manager|P1: Mode is set to"@GetName());
         }
     }
